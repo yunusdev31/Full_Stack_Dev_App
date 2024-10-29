@@ -1,15 +1,16 @@
 const User = require('../models/userSchema')
+const jwt = require('jsonwebtoken')
 const secret = "Data@123"
 
 async function register(req, res) {
     try{
        let {username, password, role} = req.body
 
-       if(!username || !password){
+       if(!username || !password || !role){
         return res.status(400).json({message: "Fields missing !!"})
        }
-
-       const userExist = await User.find({username: username})
+       console.log("inside register fxn")
+       const userExist = await User.findOne({username: username})
 
        if(userExist){
         return res.status(400).json({message: "Username already exists !!"})
@@ -23,7 +24,9 @@ async function register(req, res) {
 
        await user.save();
 
-       let token = jwt.sign({id: user._id}, secret, {expiresIn: '1d'})
+       console.log(user)
+
+       let token = jwt.sign({userId: user._id}, secret, {expiresIn: '1d'})
 
        return res.status(201).json({message: "User created successfully !!", user, token})
 
@@ -40,10 +43,10 @@ async function login(req, res) {
         return res.status(400).json({message: "Fields missing !!"})
        }
 
-       const userLogin = await User.find({username: username, password: password})
+       const userLogin = await User.findOne({username: username, password: password})
 
        if(userLogin){
-        let token = jwt.sign({id: userLogin._id}, secret, {expiresIn: '1d'})
+        let token = jwt.sign({userId: userLogin._id}, secret, {expiresIn: '1d'})
 
         return res.status(200).json({message: "User logged in successfully", token})        
        }
@@ -53,4 +56,9 @@ async function login(req, res) {
     }catch(err){
        return res.status(500).json({message: err})
     }
+}
+
+module.exports = {
+    register,
+    login
 }
