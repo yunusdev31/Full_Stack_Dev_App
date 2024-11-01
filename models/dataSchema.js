@@ -1,15 +1,19 @@
 const mongoose = require('mongoose')
 
 const dataSchema = new mongoose.Schema({
+    date: {
+        type: Date,
+        required: true
+    },
     open: {
         type: Number,
         required: true
     },
-    low: {
+    high: {
         type: Number,
         required: true
     },
-    high: {
+    low: {
         type: Number,
         required: true
     },
@@ -18,6 +22,10 @@ const dataSchema = new mongoose.Schema({
         required: true
     },
     volume: {
+        type: Number,
+        required: true
+    },
+    openInt: {
         type: Number,
         required: true
     }
