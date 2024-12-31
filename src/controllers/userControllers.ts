@@ -1,8 +1,9 @@
-const User = require('../models/userSchema')
+import { Request, Response } from 'express'
+import { User } from '../models/userSchema'
 const jwt = require('jsonwebtoken')
 const secret = "Data@123"
 
-async function register(req, res) {
+export const register = async (req: Request, res: Response): Promise<any> => {
     try{
        let {username, password, role} = req.body
 
@@ -35,9 +36,9 @@ async function register(req, res) {
     }
 }
 
-async function login(req, res) {
+ export const login = async(req: Request, res: Response): Promise<any> => {
     try{
-       let {username, password} = req.body
+       let {username, password} = req.body as {username: string, password: string}
 
        if(!username || !password){
         return res.status(400).json({message: "Fields missing !!"})

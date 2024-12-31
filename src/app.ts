@@ -1,8 +1,10 @@
-const express = require('express')
-require('./models/db.js')
+import express from 'express'
+import {connectDB} from './models/db'
+import user from './routes/userRoutes'
+import data from './routes/dataRoutes'
 const PORT = 8000;
-const user = require('./routes/userRoutes.js')
-const data = require('./routes/dataRoutes.js')
+connectDB()
+
 const app = express();
 app.use(express.json());
 

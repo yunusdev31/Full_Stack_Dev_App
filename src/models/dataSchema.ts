@@ -1,34 +1,37 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
-const dataSchema = new mongoose.Schema({
+interface IData {
+    date: Date,
+    open: number,
+    high: number,
+    low: number,
+    close: number,
+    volume: number,
+    openInt: number
+}
+
+const dataSchema = new mongoose.Schema<IData>({
     date: {
         type: Date,
-        required: true
     },
     open: {
         type: Number,
-        required: true
     },
     high: {
         type: Number,
-        required: true
     },
     low: {
         type: Number,
-        required: true
     },
     close: {
         type: Number,
-        required: true
     },
     volume: {
         type: Number,
-        required: true
     },
     openInt: {
         type: Number,
-        required: true
     }
 })
 
-module.exports = mongoose.model('Data', dataSchema)
+export const Data = mongoose.model<IData>('Data', dataSchema)
