@@ -17,10 +17,10 @@ type stocksType = {
   openInt: number
 };
 
-const readStreamFun = async (filePath: string, stocks: stocksType[], res: Response, done: any): Promise<void> => {
-  console.log("filePath 111----", filePath)
+// Function to read the data from the file
+const readStreamFun = async (filePath: string, stocks: stocksType[], res: Response): Promise<void> => {
+  // console.log("filePath ----", filePath)
   let readStream = fs.createReadStream(filePath).pipe(csv.parse({delimiter: ",", from_line: 2 }))
-  console.log("filePath 222----", filePath)
   return new Promise((resolve, reject) => {
     readStream.on('data', (row) => {
       //console.log("row data------", row)
@@ -86,17 +86,72 @@ export const uploadData = async(req: Request, res: Response): Promise<any> => {
       const {filePath} = job.data
       const stocksFolder = fs.readdirSync(filePath)
       console.log("stocks file==>", stocksFolder)
-      let stocks: stocksType[] = [];
 
       for(let file of stocksFolder){
+        let stocks: stocksType[] = []
         console.log("file name===", file)
         let filePath = path.join(dirPath, file)
-        await readStreamFun(filePath, stocks, res, done)
+        await readStreamFun(filePath, stocks, res)
       }
       done();
     })
   } catch(error: any){
     return res.status(500).json({message: error.message})
+  }
+}
+
+export const getDetailedData = async(req: Request, res: Response): Promise<any> => {
+  try{
+    let {startDate, endDate, page, limit} = req.body as {startDate: string, endDate: string, page: number, limit: number}
+
+    if(!startDate || !endDate || !page || !limit){
+      return res.status(400).json({message: "Fields missing !!"})
+    }
+
+    const query = {date: {$gte: new Date(startDate), $lte: new Date(endDate)}}
+
+    const data = await Data.find(query).skip(page*limit).limit(limit)
+
+    if(data.length > 0){
+      console.log("Data is being fetched !!")
+      console.log("Chunk data came, Data===", data)
+      return res.status(200).json({message: "Data fetched successfully !!", data})
+    }
+  } catch(error: any){
+    return res.status(500).json({message: `Some error occuered in getting data ${error.message}`})
+  }
+}
+
+export const getLimitedData = async(req: Request, res: Response): Promise<any> => {
+  try{
+    let {startDate, endDate, page, limit} = req.body as {startDate: string, endDate: string, page: number, limit: number}
+
+    if(!startDate || !endDate || !page || !limit){
+      return res.status(400).json({message: "Fields missing !!"})
+    }    
+
+    const data = await Data.aggregate([
+      {
+        $match: {date: { $gte: new Date(startDate), $lte: new Date(endDate) }}
+      },
+      {
+        $project: { open: 1, close: 1, _id: 0 }
+      },
+      {
+        $skip: page*limit
+      },
+      {
+        $limit: limit
+      }
+    ]);
+
+    if(data.length > 0){
+      console.log("Limited Data is being fetched !!")
+      console.log("Chunk limited data came, Data===", data)
+      return res.status(200).json({message: "Data fetched successfully !!", data})
+    }
+  } catch(error: any){
+    return res.status(500).json({message: `Some error occuered in getting limited data ${error.message}`})
   }
 }
 

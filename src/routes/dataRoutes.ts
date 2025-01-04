@@ -1,10 +1,12 @@
 import express from 'express';
 const router = express.Router();
 import {authMiddleware} from '../models/middleware'
-import {uploadData} from '../controllers/dataControllers'
+import {getDetailedData, getLimitedData, uploadData} from '../controllers/dataControllers'
 
 router.post('/upload', authMiddleware(['admin']), uploadData)
 
-router.post('')
+router.get('/getDetailedData', authMiddleware(['admin']), getDetailedData)
+
+router.get('/getLimitedData', authMiddleware(['admin', 'manager']), getLimitedData)
 
 export = router
