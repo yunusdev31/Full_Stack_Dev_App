@@ -155,5 +155,43 @@ export const getLimitedData = async(req: Request, res: Response): Promise<any> =
   }
 }
 
+export const getAvgValues = async(req: Request, res: Response): Promise<any> => {
+  try{
+    let {startDate, endDate} = req.body as {startDate: string, endDate: string, page: number, limit: number}
+
+    console.log("startDate===", startDate)
+
+    if(!startDate || !endDate){
+      return res.status(400).json({message: "Fields missing !!"})
+    }
+
+    const data = await Data.aggregate([
+      {
+        $match: {date: {$gte: new Date(startDate), $lte: new Date(endDate)}}
+      },
+      {
+        $group: {
+          _id: null,
+          avgOpen: {$avg: "$open"},
+          avgClose: {$avg: "$close"},
+          avgHigh: {$avg: "$high"},
+          avgLow: {$avg: "$low"},
+          avgVolume: {$avg: "$volume"},
+          avgOpenInt: {$avg: "$openInt"}
+        }
+      },
+    ])
+    
+    if(data.length > 0){
+      console.log("Limited Data is being fetched !!")
+      console.log("Chunk limited data came, Data===", data)
+      return res.status(200).json({message: "Avg values fetched successfully !!", data})
+    }
+
+  } catch(error: any){
+    return res.status(500).json({message: `Some error occuered in getting avg values ${error.message}`})
+  }
+}
+
 
 
